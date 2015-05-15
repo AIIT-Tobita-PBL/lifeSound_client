@@ -41,7 +41,10 @@ host = "localhost"
 port = 10500
 
 #検知する単語のリスト
-wordList = ["handWash"]
+wordList = [{
+  sound: "handWash",
+  dispWord:  "手洗い音"
+  }]
 
 s = nil
 until s
@@ -67,9 +70,9 @@ while true
       unless buff == ""
         #puts buff
         wordList.each do |word|
-            if buff =~ /#{word}/
+            if buff =~ /#{word[:sound]}/
               t = Time.now.strftime("%Y-%m-%d %H:%M")
-              send_json "#{t} : #{word}を認識しました"
+              send_json "#{t} : #{word[:dispWord]}を認識しました"
             end
         end
       end
