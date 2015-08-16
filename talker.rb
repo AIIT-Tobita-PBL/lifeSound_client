@@ -16,7 +16,7 @@ class Talker
         goodAfternoon: "konnnichiwa.wav",
         goodEvening: "konbanwa.wav",
         goodNight: "oyasuminasai.wav",
-        welcomeBack: "okaerinasai",
+        welcomeBack: "okaerinasai.wav",
         lonely: "samishii.wav",
         handWash: "te_aratta.wav"
     }
