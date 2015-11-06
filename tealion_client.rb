@@ -5,7 +5,7 @@ require 'socket'
 require 'bundler'
 require 'net/http'
 require 'json'
-require_relative 'talker'
+#require_relative 'talker'
 Bundler.require
 
 HOST = "192.168.100.107:3000"
@@ -62,14 +62,28 @@ def connectToJulius
   return s
 end
 
+def speak(status)
+  voiceDir = "/tmp"
+  statusList = {
+    hello: "hellow.wav",
+    handWash: "handWash.wav",
+    question: "question.wav"
+  }
+  wavFile = voiceDir + "/" + statusList[status]
+  unless File.exists?(wavFile)
+    raise "指定された音声ファイルが存在しません。"
+  end
+  unless system("aplay #{wavFile}")
+    raise "音声出力に失敗しました"
+  end
+end
+end
+
 #検知する単語のリスト
 wordList = [{
   sound: "handWash",
   dispWord:  "手洗い音"
   }]
-
-#発話用インスタンス作成
-talker = Talker.new
 
 #Julius接続
 s = connectToJulius
@@ -104,14 +118,12 @@ while true
             prev_t[soundName] = ts
             send_json "#{ts} : #{soundName}を認識しました"
             recogFlag = true
-            speak_word = talker.selectVoiceIfRecognized(word)
-            talker.talk(speak_word)
+            #speak :handWash
           end
         end
       end
       if recogFlag
-        speak_word = talker.selectVoiceByTime()
-        talker.talk(speak_word)
+        speak :question
       end
       prev_t = {}
       source = ""
