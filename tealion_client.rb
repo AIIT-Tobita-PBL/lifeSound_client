@@ -77,6 +77,19 @@ def speak(status)
     raise "音声出力に失敗しました"
   end
 end
+
+def record
+  recordDir = "/tmp"
+  wavFile = recordDir + "/" + recordDir
+  unless system("arecord #{wavFile}")
+    raise "音声録音に失敗しました"
+  end
+  upload_wav wavFile
+end
+
+def upload_wav
+  curlCmd = "curl -X POST -F wavFile=@#{wavFile} -F id=1 http://#{HOST}/uploaders"
+  system("")
 end
 
 #検知する単語のリスト
@@ -124,6 +137,7 @@ while true
       end
       if recogFlag
         speak :question
+        record
       end
       prev_t = {}
       source = ""
