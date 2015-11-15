@@ -81,7 +81,7 @@ end
 def record
   recordDir = "/tmp"
   wavFile = recordDir + "/" + recordDir
-  unless system("arecord #{wavFile}")
+  unless system("arecord -d 10 #{wavFile}")
     raise "音声録音に失敗しました"
   end
   upload_wav wavFile
