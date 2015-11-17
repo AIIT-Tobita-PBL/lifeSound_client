@@ -83,10 +83,21 @@ def record
   recordDir = "/tmp"
   #wavFile = recordDir + "/" + recordDir
   wavFile = recordDir + "/wavFile.wav"
-  unless system("arecord -d 10 #{wavFile}")
-    raise "音声録音に失敗しました"
-  end
+  julius stop
+  stdout, stderr, status = Open3.capture3("ecasound -t:10 -i /dev/dsp1 -o #{wavFile}")
+  p stdout
+  p stderr
+  p status
+  julius start
   upload_wav(wavFile)
+end
+
+def julius(state)
+  if state != "start" && state != "stop"
+  juliusCmd = "/etc/init.d/julius #{{state}}"
+  stdout, stderr, status = Open3.capture3(juliusCmd)
+  p status
+  return status
 end
 
 def upload_wav(wavFile)
