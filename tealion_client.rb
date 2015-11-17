@@ -8,7 +8,6 @@ require 'json'
 #require_relative 'talker'
 Bundler.require
 
-#HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1:3000"
 
 def send_json(msg)
@@ -64,7 +63,7 @@ def connectToJulius
 end
 
 def speak(status)
-  voiceDir = "/tmp"
+  voiceDir = "/tmp/tealion/speech"
   statusList = {
     hello: "hello.wav",
     handWash: "handWash.wav",
@@ -80,8 +79,7 @@ def speak(status)
 end
 
 def record
-  recordDir = "/tmp"
-  #wavFile = recordDir + "/" + recordDir
+  recordDir = "/tmp/tealion/record"
   wavFile = recordDir + "/wavFile.wav"
   unless system("arecord -d 10 #{wavFile}")
     raise "音声録音に失敗しました"
@@ -90,7 +88,6 @@ def record
 end
 
 def upload_wav(wavFile)
-  #curlCmd = "curl -X POST -F wavFile=@#{wavFile} -F id=1 http://#{HOST}/uploaders"
   curlCmd = "curl -X POST -F wavFile=#{wavFile} -F id=1 http://#{HOST}:3000/uploaders"
   system(curlCmd)
 end
