@@ -64,7 +64,7 @@ def connectToJulius
 end
 
 def speak(status)
-  voiceDir = "/tmp"
+  voiceDir = "/tmp/tealion/speech"
   statusList = {
     hello: "hello.wav",
     handWash: "handWash.wav",
@@ -80,7 +80,7 @@ def speak(status)
 end
 
 def record
-  recordDir = "/tmp"
+  recordDir = "/tmp/tealion/record"
   #wavFile = recordDir + "/" + recordDir
   wavFile = recordDir + "/wavFile.wav"
   unless system("arecord -d 10 #{wavFile}")
