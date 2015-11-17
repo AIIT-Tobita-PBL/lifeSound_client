@@ -11,6 +11,8 @@ Bundler.require
 #HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1:3000"
 
+APP_ROOT="#{ENV['HOME']}/tealion"
+
 def send_json(msg)
     src = "http://#{HOST}/log_views.json"
     uri = URI.parse(src)
@@ -94,7 +96,7 @@ end
 
 def julius(state)
   if state != "start" && state != "stop"
-  juliusCmd = "/etc/init.d/julius #{{state}}"
+  juliusCmd = "#{APP_ROOT}/etc/init.d/julius #{{state}}"
   stdout, stderr, status = Open3.capture3(juliusCmd)
   p status
   return status
