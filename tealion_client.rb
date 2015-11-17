@@ -8,7 +8,6 @@ require 'json'
 #require_relative 'talker'
 Bundler.require
 
-#HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1:3000"
 
 def send_json(msg)
@@ -81,7 +80,6 @@ end
 
 def record
   recordDir = "/tmp/tealion/record"
-  #wavFile = recordDir + "/" + recordDir
   wavFile = recordDir + "/wavFile.wav"
   unless system("arecord -d 10 #{wavFile}")
     raise "音声録音に失敗しました"
@@ -90,7 +88,6 @@ def record
 end
 
 def upload_wav(wavFile)
-  #curlCmd = "curl -X POST -F wavFile=@#{wavFile} -F id=1 http://#{HOST}/uploaders"
   curlCmd = "curl -X POST -F wavFile=#{wavFile} -F id=1 http://#{HOST}:3000/uploaders"
   system(curlCmd)
 end
