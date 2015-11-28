@@ -50,7 +50,7 @@ def connectToJulius
 end
 
 def speak(status)
-  voiceDir = "/tmp"
+  voiceDir = "/tmp/voice/speech"
   statusList = {
     hello: "hello.wav",
     handWash: "handWash.wav",
@@ -69,7 +69,7 @@ end
 def record
   recordDir = "/tmp"
   #wavFile = recordDir + "/" + recordDir
-  wavFile = recordDir + "/wavFile.wav"
+  wavFile = recordDir + "/voice/record/wavFile.wav"
 
   stdout, stderr, status = Open3.capture3("ecasound -t:30 -i /dev/dsp1 -o #{wavFile}")
   p stdout
