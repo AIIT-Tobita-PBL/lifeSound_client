@@ -71,7 +71,7 @@ def record
   #wavFile = recordDir + "/" + recordDir
   wavFile = recordDir + "/voice/record/wavFile.wav"
 
-  stdout, stderr, status = Open3.capture3("ecasound -t:30 -i /dev/dsp1 -o #{wavFile}")
+  stdout, stderr, status = Open3.capture3("ecasound -t:30 -i alsa -o #{wavFile}")
   p stdout
   p stderr
   p status
