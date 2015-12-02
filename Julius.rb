@@ -55,7 +55,7 @@ class Julius
 								#send_json "#{ts} : #{dispName}を認識しました"
 								if askQuestion
 									p "break the loop"
-									return #{ts},#{dispName}
+									return ts,dispName
 								end
 							end
 						end

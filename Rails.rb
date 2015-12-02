@@ -4,18 +4,6 @@
 class Rails
 	RAILS_PORT = 3000
 
-	def record
-		recordDir = "/tmp/tealion/record"
-		wavFile = recordDir + "/wavFile.wav"
-
-		stdout, stderr, status = Open3.capture3("ecasound -t:30 -i alsa -o #{wavFile}")
-		p stdout
-		p stderr
-		p status
-		upload_wav(wavFile)
-	end
-
-
 	def upload_wav(wavFile)
 		curlCmd = "curl -X POST -F wavFile=@#{wavFile} -F id=1 http://#{HOST}:#{RAILS_PORT}/uploaders"
 		system(curlCmd)

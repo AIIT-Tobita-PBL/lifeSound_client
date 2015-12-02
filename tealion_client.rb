@@ -16,35 +16,20 @@ APP_ROOT="#{ENV['HOME']}/tealion"
 
 require File.dirname(__FILE__) + "/Julius"
 require File.dirname(__FILE__) + "/Rails"
-
-def speak(status)
-  voiceDir = "/tmp/tealion/speech"
-  statusList = {
-    hello: "hello.wav",
-    handWash: "handWash.wav",
-    question: "question.wav"
-  }
-  wavFile = voiceDir + "/" + statusList[status]
-  unless File.exists?(wavFile)
-    raise "指定された音声ファイルが存在しません。"
-  end
-  stdout, stderr, status = Open3.capture3("aplay #{wavFile}")
-  p stdout
-  p stderr
-  p status
-end
+require File.dirname(__FILE__) + "/Voice"
 
 
 rails = Rails.new()
+voice = Voice.new()
 julius = Julius.new()
 #Julius接続
 s = julius.connectToJulius()
 
-
 while true
     #認識
     ts, dispName = julius.receiveData(s)
-		rails.send_json "#{ts} : #{dispName}を認識しました"
-    speak :question
-    rails.record
+		rails.send_json("#{ts} : #{dispName}を認識しました")
+    voice.speak("question")
+    wavFile = voice.record
+    rails.upload_wav(wavFile)
 end
