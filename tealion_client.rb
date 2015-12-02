@@ -67,9 +67,8 @@ def speak(status)
 end
 
 def record
-  recordDir = "/tmp"
-  #wavFile = recordDir + "/" + recordDir
-  wavFile = recordDir + "/tealion/record/wavFile.wav"
+  recordDir = "/tmp/tealion/record"
+  wavFile = recordDir + "/wavFile.wav"
 
   stdout, stderr, status = Open3.capture3("ecasound -t:30 -i alsa -o #{wavFile}")
   p stdout
@@ -149,17 +148,11 @@ end
   askQuestion: true
 }]
 
+#Julius接続
+s = connectToJulius
 while true
-    p "starting Julius...."
-    startJulius
-    sleep 5
-    #Julius接続
-    s = connectToJulius
     #認識
     receiveData(s)
-    #Julius一旦停止
-    p "stopping Julius...."
-    stopJulius(s)
     speak :question
     record
 end
