@@ -5,6 +5,8 @@ class Voice
 	def record
 		recordDir = "/tmp/tealion/record"
 		wavFile = recordDir + "/wavFile.wav"
+		#unixtime = Time.now.to_i
+		#wavFile = recordDir + "/" + unixtime.to_s + ".wav"
 
 		stdout, stderr, status = Open3.capture3("ecasound -t:30 -i alsa -o #{wavFile}")
 		p stdout
