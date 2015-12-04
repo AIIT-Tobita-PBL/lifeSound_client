@@ -29,8 +29,8 @@ while true
     #認識
     ts, dispName = julius.receiveData(s)
 		rails.send_json("#{ts} : #{dispName}を認識しました")
-    voice.speak("question")
-    wavFile = voice.record
-    rails.upload_wav(wavFile)
-		#system("ruby record.rb &")
+    #voice.speak("question")
+    #wavFile = voice.record
+    #rails.upload_wav(wavFile)
+		system("ruby record.rb &")
 end
