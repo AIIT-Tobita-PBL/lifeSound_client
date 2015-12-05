@@ -14,23 +14,23 @@ HOST = "127.0.0.1"
 
 APP_ROOT="#{ENV['HOME']}/tealion"
 
+# 分割した必要なクラスファイルをインポート
 require File.dirname(__FILE__) + "/Julius"
 require File.dirname(__FILE__) + "/Rails"
-require File.dirname(__FILE__) + "/Voice"
 
 
 rails = Rails.new()
-voice = Voice.new()
 julius = Julius.new()
+
 #Julius接続
 s = julius.connectToJulius()
 
 while true
-    #認識
-    ts, dispName = julius.receiveData(s)
-		rails.send_json("#{ts} : #{dispName}を認識しました")
-    #voice.speak("question")
-    #wavFile = voice.record
-    #rails.upload_wav(wavFile)
-		system("ruby record.rb &")
+	# juliusから認識結果を受け取ったらrailsへアップロード
+	ts, dispName = julius.receiveData(s)
+	rails.send_json("#{ts} : #{dispName}を認識しました")
+	
+	# 10秒間録音してrailsへアップロード
+	# 録音中は二重起動しない(ヘッポコ)
+	system("ruby record.rb &")
 end
