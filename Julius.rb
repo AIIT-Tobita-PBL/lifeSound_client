@@ -4,6 +4,7 @@
 class Julius
 	JULIUS_PORT = 10500
 
+	# 初期化処理
 	def initialize()
 		#検知する単語のリスト
 		@wordList = [{
@@ -13,6 +14,7 @@ class Julius
 		}]
 	end
 
+	# juliusへ接続
 	def connectToJulius
  	 #Juliusホスト、ポートの定義
  	 s = nil
@@ -29,6 +31,7 @@ class Julius
  	 return s
 	end
 
+	# juliusから認識結果を受信
 	def receiveData(s)
 		source = ""
 		prev_t = {}
@@ -67,6 +70,7 @@ class Julius
 		end
 	end
 
+	# juliusのサービスコントロール用(今は使用していない)
 	def juliusControl(cmd)
 		status = "do nothing"
 		if cmd == "start" || cmd == "stop"
@@ -77,11 +81,13 @@ class Julius
 		return status
 	end
 
+	# juliusサービスの停止(今は使用していない)
 	def stopJulius(s)
 		s.close
 		juliusControl "stop"
 	end
 
+	# juliusサービスのスタート(今は使用していない)
 	def startJulius
 		juliusControl "start"
 	end
