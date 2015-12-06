@@ -8,7 +8,7 @@ def check_wavFile(wavFile)
 		p "#{wavFile}が存在するため録音はスキップします"
 		exit!
 	end
-	FileUtils.touch(wavFile)
+	File.open(wavFile, "w").close()
 end
 
 recordDir = "/tmp/tealion/record"

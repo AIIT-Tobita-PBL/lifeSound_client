@@ -32,5 +32,5 @@ while true
 	
 	# 10秒間録音してrailsへアップロード
 	# 録音中は二重起動しない(ヘッポコ処理でロックが不十分なのでいつか治す)
-	system("ruby record.rb &")
+	#system("ruby record.rb &")
 end
