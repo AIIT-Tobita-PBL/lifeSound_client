@@ -4,7 +4,8 @@
 class Voice
 	# 録音処理
 	def record(wavFile)
-		stdout, stderr, status = Open3.capture3("ecasound -t:10 -i alsa -o #{wavFile}")
+		#stdout, stderr, status = Open3.capture3("ecasound -t:10 -i alsa -o #{wavFile}")
+		stdout, stderr, status = Open3.capture3("arecord -d 10 #{wavFile}")
 		p stdout
 		p stderr
 		p status
