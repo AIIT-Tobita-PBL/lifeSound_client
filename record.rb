@@ -1,15 +1,19 @@
 #! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+
+def check_wavFile(wavFile)
+	# 録音ファイルが存在したら処理を停止
+	if File.exist?(wavFile) then
+		p "#{wavFile}が存在するため録音はスキップします"
+		exit!
+	end
+	File.open(wavFile, "w").close()
+end
+
 recordDir = "/tmp/tealion/record"
 wavFile = recordDir + "/wavFile.wav"
-
-# 録音ファイルが存在したら処理を停止
-if File.exist?(wavFile) then
-	p "#{wavFile}が存在するため録音はスキップします"
-	exit!
-end
-FileUtils.touch(wavFile)
+check_wavFile(wavFile)
 
 require 'socket'
 require 'bundler'

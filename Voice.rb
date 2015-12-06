@@ -2,22 +2,16 @@
 # -*- coding: utf-8 -*-
 
 class Voice
+	# 録音処理
 	def record(wavFile)
-		#recordDir = "/tmp/tealion/record"
-		#wavFile = recordDir + "/wavFile.wav"
-		#unixtime = Time.now.to_i
-		#wavFile = recordDir + "/" + unixtime.to_s + ".wav"
-
 		stdout, stderr, status = Open3.capture3("ecasound -t:10 -i alsa -o #{wavFile}")
 		p stdout
 		p stderr
 		p status
 		return wavFile
-		#	unless system("arecord -d 10 #{wavFile}")
-		#		raise "音声録音に失敗しました"
-		#	end
 	end
 
+	# 発声処理
 	def speak(status)
 		voiceDir = "/tmp/tealion/speech"
 		statusList = {
