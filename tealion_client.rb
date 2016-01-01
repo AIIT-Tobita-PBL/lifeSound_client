@@ -28,7 +28,7 @@ s = julius.connectToJulius()
 while true
 	# juliusから認識結果を受け取ったらrailsへアップロード
 	ts, dispName = julius.receiveData(s)
-	rails.send_json("#{ts} : #{dispName}を認識しました")
+	rails.send_json("#{ts} : 環境音(#{dispName})を認識しました")
 	
 	# 10秒間録音してrailsへアップロード
 	# 録音中は二重起動しない(ヘッポコ処理でロックが不十分なのでいつか治す)
