@@ -1,7 +1,13 @@
 #! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+require 'socket'
+require 'net/http'
+require 'json'
+require 'open3'
+
 class Rails
+	HOST = "127.0.0.1"
 	RAILS_PORT = 3000
 
 	def upload_wav(wavFile)

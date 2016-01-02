@@ -12,10 +12,11 @@ Bundler.require
 #HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1"
 
-APP_ROOT="#{ENV['HOME']}/tealion"
+#APP_ROOT="#{ENV['HOME']}/tealion"
+APP_ROOT="#{ENV['TEALION_ROOT']}"
 
 # 分割した必要なクラスファイルをインポート
-require File.dirname(__FILE__) + "/Julius"
+require File.dirname(__FILE__) + "/Julius-voice"
 require File.dirname(__FILE__) + "/Rails"
 
 
@@ -27,10 +28,10 @@ s = julius.connectToJulius()
 
 while true
 	# juliusから認識結果を受け取ったらrailsへアップロード
-	ts, dispName = julius.receiveData(s)
-	rails.send_json("#{ts} : 環境音(#{dispName})を認識しました")
+	ts, listening, answer = julius.receiveData(s)
+	rails.send_json("#{ts} : 発話(#{listening})を認識しました")
 	
-	# 10秒間録音してrailsへアップロード
-	# 録音中は二重起動しない(ヘッポコ処理でロックが不十分なのでいつか治す)
-	system("ruby record.rb &")
+	tmp = "今の発言は、#{listening}、ですね。"
+	tmp += answer
+	system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 end
