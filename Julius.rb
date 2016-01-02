@@ -3,15 +3,23 @@
 
 class Julius
 	JULIUS_PORT = 10500
-
-	# 初期化処理
-	def initialize()
-		#検知する単語のリスト
-		@wordList = [{
+	ALL_WORD_LIST = {
+		handwash: [{
 			sound: "handWash",
 			dispWord:  "手洗い音",
-			askQuestion: true
+			askQuestion: false
+		}],
+		mouthWash: [{
+			sound: "ugai",
+			dispWord:  "うがい音",
+			askQuestion: false
 		}]
+	}
+	# 初期化処理
+	def initialize(role = "handWash")
+		#検知する単語のリストを定義
+		#役割（ROLE）ごとに異なる
+		@wordList = ALL_WORD_LIST(role)
 	end
 
 	# juliusへ接続
@@ -45,15 +53,15 @@ class Julius
 					buff = (xml/"RECOGOUT"/"SHYPO"/"WHYPO").inject("") {|ws, w| ws + w["WORD"] }
 					unless buff == ""
 					#puts buff
-					@wordList.each do |word|
-						soundName = word[:sound]
-						dispName = word[:dispWord]
-						askQuestion = word[:askQuestion]
-						if buff =~ /#{soundName}/
-							t = Time.now
-							ts = t.strftime("%Y-%m-%d %H:%M")
-							puts "recognized #{soundName}"
-							next if prev_t.has_key?(soundName)
+						@wordList.each do |word|
+							soundName = word[:sound]
+							dispName = word[:dispWord]
+							askQuestion = word[:askQuestion]
+							if buff =~ /#{soundName}/
+								t = Time.now
+								ts = t.strftime("%Y-%m-%d %H:%M")
+								puts "recognized #{soundName}"
+								next if prev_t.has_key?(soundName)
 								prev_t[soundName] = ts
 								#send_json "#{ts} : #{dispName}を認識しました"
 								if askQuestion
