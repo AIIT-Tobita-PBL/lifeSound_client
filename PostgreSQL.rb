@@ -33,7 +33,6 @@ class PostgreSQL
 			# 各行を処理する
 			result.each do |tuple|
 				msgs.push(tuple['msg'])
-				puts tuple['msg']
 			end
 		ensure
 			return msgs

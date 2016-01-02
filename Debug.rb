@@ -8,7 +8,7 @@ class Debug
 
 	def print(msg)
 		if @debug_flg
-			puts msg
+			puts "#{caller[0]} : #{msg}"
 		end
 	end
 end
