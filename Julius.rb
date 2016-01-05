@@ -19,7 +19,7 @@ class Julius
 	def initialize(role = "handWash")
 		#検知する単語のリストを定義
 		#役割（ROLE）ごとに異なる
-		@wordList = ALL_WORD_LIST(role)
+		@wordList = ALL_WORD_LIST[role]
 	end
 
 	# juliusへ接続
