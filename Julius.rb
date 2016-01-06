@@ -4,19 +4,24 @@
 class Julius
 	JULIUS_PORT = 10500
 	ALL_WORD_LIST = {
-		handwash: [{
+		"handWash" =>  [{
 			sound: "handWash",
 			dispWord:  "手洗い音",
 			askQuestion: false
 		}],
-		mouthWash: [{
+		"mouthWash" => [{
 			sound: "ugai",
 			dispWord:  "うがい音",
+			askQuestion: false
+		}],
+		"entrance_lock" => [{
+			sound: "entrance_lock",
+			dispWord:  "施錠音",
 			askQuestion: false
 		}]
 	}
 	# 初期化処理
-	def initialize(role = "handWash")
+	def initialize(role)
 		#検知する単語のリストを定義
 		#役割（ROLE）ごとに異なる
 		@wordList = ALL_WORD_LIST[role]
