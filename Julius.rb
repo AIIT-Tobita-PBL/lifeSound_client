@@ -1,8 +1,13 @@
 #! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+DEBUG_MODE = false
+
 class Julius
+	require File.dirname(__FILE__) + "/Debug"
+
 	JULIUS_PORT = 10500
+
 	ALL_WORD_LIST = {
 		"handWash" =>  [{
 			sound: "handWash",
@@ -20,11 +25,15 @@ class Julius
 			askQuestion: false
 		}]
 	}
+
 	# 初期化処理
 	def initialize(role)
 		#検知する単語のリストを定義
 		#役割（ROLE）ごとに異なる
 		@wordList = ALL_WORD_LIST[role]
+
+		@debug = Debug.new(DEBUG_MODE)
+
 	end
 
 	# juliusへ接続
@@ -57,7 +66,7 @@ class Julius
 					xml = Nokogiri(source)
 					buff = (xml/"RECOGOUT"/"SHYPO"/"WHYPO").inject("") {|ws, w| ws + w["WORD"] }
 					unless buff == ""
-					#puts buff
+					@debug.print(buff)
 						@wordList.each do |word|
 							soundName = word[:sound]
 							dispName = word[:dispWord]
