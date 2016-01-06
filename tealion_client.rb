@@ -4,7 +4,7 @@
 require 'socket'
 require 'bundler'
 require 'net/http'
-require 'json'
+#require 'json'
 require 'open3'
 #require_relative 'talker'
 Bundler.require
@@ -13,6 +13,7 @@ Bundler.require
 #現状、handWash(手洗い音)かmouthWash(うがい)を選択可能
 #ROLE = "handWash"
 ROLE = "mouthWash"
+#ROLE = "entrance_lock"
 #HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1"
 APP_ROOT="#{ENV['HOME']}/tealion"
@@ -25,10 +26,10 @@ require File.dirname(__FILE__) + "/Rails"
 record = false
 
 rails = Rails.new()
-julius = Julius.new()
+julius = Julius.new(ROLE)
 
 #Julius接続
-s = julius.connectToJulius(ROLE)
+s = julius.connectToJulius()
 
 while true
 	# juliusから認識結果を受け取ったらrailsへアップロード
