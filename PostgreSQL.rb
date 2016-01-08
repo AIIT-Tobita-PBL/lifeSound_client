@@ -17,8 +17,8 @@ class PostgreSQL
 		#return conn
 	end
 
-	def sql()
-		t = Time.now - 36000
+	def sql(t)
+		#t = Time.now - 360
 		ts = t.strftime("%Y-%m-%d %H:%M")
 		msgs = []
 
