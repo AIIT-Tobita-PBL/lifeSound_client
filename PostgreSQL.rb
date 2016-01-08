@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 
 class PostgreSQL
+	DEBUG_MODE = false
+	require File.dirname(__FILE__) + "/Debug"
+
 	require 'pg'
 
 	def initialize()
+		@debug = Debug.new(DEBUG_MODE)
 	end
 
 	def connect()
@@ -18,7 +22,11 @@ class PostgreSQL
 	end
 
 	def sql(t)
+<<<<<<< HEAD
 		#t = Time.now - 360
+=======
+		#t = Time.now - 36000
+>>>>>>> master
 		ts = t.strftime("%Y-%m-%d %H:%M")
 		msgs = []
 

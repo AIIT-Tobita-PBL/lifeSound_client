@@ -28,9 +28,11 @@ record = false
 rails = Rails.new()
 julius = Julius.new(ROLE)
 
+
 #Julius接続
 s = julius.connectToJulius()
 
+# main loop
 while true
 	# juliusから認識結果を受け取ったらrailsへアップロード
 	ts, dispName = julius.receiveData(s)
