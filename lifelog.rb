@@ -23,7 +23,8 @@ class LifeLog
 
 		@sound_patterns = [
 			"施錠音",
-			"手洗い音"
+			"手洗い音",
+			"うがい音"
 		]
 
 		@lock_flg = false
@@ -42,7 +43,7 @@ class LifeLog
 	end
 
 
-	def checkLock(recog_sound, log_time)
+	def checkLock(recog_sound, t)
 	######################
 	#
 	# 施錠音がしたかチェック
@@ -50,9 +51,15 @@ class LifeLog
 	# 当然帰宅したか外出したか間違えたら間違え続ける
 	#
 	######################
-		return	if @lock_flg
+		# 施錠音のフラグが立っている時は処理しないで抜ける
+		return if @lock_flg
+
 		if @sound_patterns[1] == recog_sound
 			@debug.print("施錠音を認識")
+			# 施錠音を認識した時刻を保存
+			@lock_time = t
+
+			# フラグ処理
 			@lock_flg = !@lock_flg
 			@ugai_flg = false
 		end
@@ -65,15 +72,21 @@ class LifeLog
 	# うがいをしたかチェック
 	#
 	######################
+		# 施錠音のフラグが立っていない時は処理しないで抜ける
 		return if @lock_flg == false
+
+		# うがい音のフラグが立っていた時は処理しないで抜ける
+		return if @ugai_flg
+
 		if @sound_patterns[1] == recog_sound
 			@debug.print("施錠後のうがいを認識")
+			# railsに実績を残す
+			@rails.send_json("#{ts} : 実績(施錠後、５分以内のうがい)")
 
-			if @ugai_flg == false
-				@rails.send_json("#{ts} : 実績(うがい)")
-				#@lock_flg = false
-				@ugai_flg = true
-			end
+			# フラグ
+			#@lock_flg = false
+			@ugai_flg = true
+
 		end
 	end
 
@@ -84,18 +97,19 @@ class LifeLog
 	# うがいを促す
 	#
 	######################
-		#if t < Time.now() - 300
-		#	
-		#end
-
+		# 施錠音が記録されており、うがい音がまだ記録されていない時のみ処理
 		if @lock_flg == true && @ugai_flg == false
+			# 施錠音の記録から5分経過した場合のみ以降を処理
+			return if @lock_time < t - 300
+
+			# うがいを促す発声
 			tmp = "忘れずにうがいをしてください"
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 		end
 	end
 
 
-	def lifeSound(msg, ts)
+	def checkLifeSound(msg, t, ts)
 	######################
 	#
 	# 環境音をチェックする
@@ -104,34 +118,34 @@ class LifeLog
 	#
 	######################
 		if(msg =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}) : 環境音\((.*)\)を認識しました/)
-			log_time = Time.local($1, $2, $3, $4, $5, 0)
+			#log_time = Time.local($1, $2, $3, $4, $5, 0)
 			recog_sound = $6
 
 
-			# 3分以上経過した施錠音のみフラグを立てる
-			checkLock(recog_sound, log_time)
+			# 施錠音の確認
+			checkLock(recog_sound, t)
 
-			# 施錠音のフラグあった場合のみ手洗いを確認する
+			# 手洗い音の確認
 			checkUgai(recog_sound, ts)
 		end
 	end
 
 
-	def parse(t, ts)
+	def parse(t, ts, last_time)
 	######################
 	#
 	# Juliusの認識結果を処理する部分
 	#
 	######################
-		msgs = @db.sql()
+		msgs = @db.sql(last_time)
 		# メッセージが入っている配列全てをチェック
 		msgs.each do |msg|
-			#@debug.print("Juliusの認識結果そのまま#{msg}")
+			#@debug.print("PostgreSQLのレコード(#{msg})")
 			# 環境音のチェック
-			lifeSound(msg, ts)
+			checkLifeSound(msg, t, ts)
 		end
 
-		# 施錠音のフラグが立っていて手洗い音のフラグがない場合はうがいを促す
+		# うがいを促す
 		letUgai(t)
 	end
 
@@ -142,10 +156,21 @@ class LifeLog
 	# main loop
 	#
 	######################
-		t, ts = getTime()
-		#while true
-			parse(t, ts)
-		#end
+		last_time = Time.now() - 300
+
+		while true
+			# 現在時刻を取得
+			t, ts = getTime()
+
+			# DBの記録を確認
+			parse(t, ts, last_time)
+
+			# 前回時刻を保存
+			last_time = t
+
+			# 1秒スリープしてloop
+			sleep(1)
+		end
 	end
 
 
@@ -168,4 +193,6 @@ lifelog = LifeLog.new()
 lifelog.run()
 
 # 終了処理
+# main loopを抜けないので基本的にここには来ない
+# ctrl−cで抜けた処理を書く時のために残しておく
 lifelog.finish()
