@@ -22,11 +22,7 @@ class PostgreSQL
 	end
 
 	def sql(t)
-<<<<<<< HEAD
 		#t = Time.now - 360
-=======
-		#t = Time.now - 36000
->>>>>>> master
 		ts = t.strftime("%Y-%m-%d %H:%M")
 		msgs = []
 
