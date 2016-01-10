@@ -8,20 +8,20 @@ class Julius
 	def initialize()
 		#検知する単語のリスト
 		@wordList = [
-			{ listening: "TEALION", answer: "このシステムのことです"},
-			{ listening: "ただいま", answer: "おかえりなさい"},
-			{ listening: "おはよう", answer: "おはようございます"},
-			{ listening: "こんにちは", answer: "こんにちは"},
-			{ listening: "こんばんは", answer: "こんばんは"},
-			{ listening: "お休み", answer: "おやすみなさい"},
-			{ listening: "ありがとう", answer: "どういたしまして"},
-			{ listening: "風邪ひいた", answer: "お大事に"},
-			{ listening: "熱がある", answer: "暖かくしてゆっくり休んでください"},
-			{ listening: "歯が痛い", answer: "歯医者へ行ってください"},
-			{ listening: "止まれ", answer: "停止します"},
-			{ listening: "AIIT", answer: "この学校のことです"},
-			{ listening: "産技大", answer: "この学校のことです"},
-			{ listening: "PBL", answer: "一年間お疲れ様でした"}
+			{ listening: "TEALION"},
+			{ listening: "ただいま"},
+			{ listening: "おはよう"},
+			{ listening: "こんにちは"},
+			{ listening: "こんばんは"},
+			{ listening: "お休み"},
+			{ listening: "ありがとう"},
+			{ listening: "風邪ひいた"},
+			{ listening: "熱がある"},
+			{ listening: "歯が痛い"},
+			{ listening: "止まれ"},
+			{ listening: "AIIT"},
+			{ listening: "産技大"},
+			{ listening: "PBL"}
 		]
 	end
 
@@ -55,22 +55,19 @@ class Julius
 					xml = Nokogiri(source)
 					buff = (xml/"RECOGOUT"/"SHYPO"/"WHYPO").inject("") {|ws, w| ws + w["WORD"] }
 					unless buff == ""
-					puts "発話(#{buff})"
-					@wordList.each do |word|
-						listening = word[:listening]
-						answer = word[:answer]
-						if buff =~ /#{listening}/
-							t = Time.now
-							ts = t.strftime("%Y-%m-%d %H:%M")
-							puts "match #{listening}"
-							next if prev_t.has_key?(listening)
-								prev_t[listening] = ts
+						puts "発話(#{buff})"
+						@wordList.each do |word|
+							listening = word[:listening]
+							if buff =~ /#{listening}/
+								t = Time.now
+								ts = t.strftime("%Y-%m-%d %H:%M")
+								puts "match #{listening}"
+
 								p "break the loop"
-								return ts,listening, answer
+								return ts,listening
 							end
 						end
 					end
-					prev_t = {}
 					source = ""
 				end
 			end
