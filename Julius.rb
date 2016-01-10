@@ -8,23 +8,23 @@ class Julius
 
 	JULIUS_PORT = 10500
 
-	ALL_WORD_LIST = [
-		{
-			sound: "handWash",
-			dispWord:  "手洗い音"
-		},{
-			sound: "ugai",
-			dispWord:  "うがい音"
-		},{
-			sound: "entrance_lock",
-			dispWord:  "施錠音"
-		}
-	]
 
 	# 初期化処理
 	def initialize()
 
 		@debug = Debug.new(DEBUG_MODE)
+		@wordList = [
+			{
+				sound: "handWash",
+				dispWord:  "手洗い音"
+			},{
+				sound: "ugai",
+				dispWord:  "うがい音"
+			},{
+				sound: "entrance_lock",
+				dispWord:  "施錠音"
+			}
+		]
 
 	end
 
