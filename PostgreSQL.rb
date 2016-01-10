@@ -60,7 +60,7 @@ class PostgreSQL
 				msg = {
 					"message" => tuple['message'],
 					"updated_at" => tuple['updated_at'],
-					"playFlag" => true
+					"playFlag" => msg['updated_at'] != tuple['updated_at']
 				}
 			end
 		ensure

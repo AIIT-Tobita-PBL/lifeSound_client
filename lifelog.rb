@@ -114,6 +114,7 @@ class LifeLog
 			return if @lockTime < t - 300
 			tmp = "帰宅してから5分経過しました。忘れずにうがいを行ってください。"
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
 			@ugai_flg = true
 		end
 	end
@@ -163,11 +164,10 @@ class LifeLog
 
 		# 記録が複数だった場合はイベントを書き換え
 		if msgs.length > 1
-			type = ""
-			recog_sound = "複数のイベントを認識しました"
+			type = @types["lifeSound"]
+			recog_sound = "#{msgs.length}件のイベント"
 		end
 
-		puts("#{msgs.length}, #{type}, #{recog_sound}")
 		# 話しかけられていた場合の処理
 		talk(msgs.length, type, recog_sound)
 
@@ -191,7 +191,9 @@ class LifeLog
 	# 認識した環境音を伝える
 		if event_count >= 1 && @types["lifeSound"] == type
 			tmp = "#{recog_sound}を認識しました。"
+			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
 		end
 	end
 
@@ -201,9 +203,12 @@ class LifeLog
 
 		if @msg["playFlag"]
 			tmp = "メッセージがあります。"
+			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
 			system("ruby record.rb")
 			@msg["playFlag"] = false
+			sleep(5)
 		end
 	end
 
@@ -211,8 +216,10 @@ class LifeLog
 	def talk(event_count, type, recog_sound)
 	# 発話機能
 		if event_count == 1 && @types["voice"] == type
-			tmp = "今の#{type}の内容は、#{recog_sound}ですね。"
+			tmp = "今の発言は、#{recog_sound}、ですね。"
+			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
 		end
 	end
 

@@ -18,7 +18,7 @@ check_wavFile(wavFile)
 require 'socket'
 require 'bundler'
 require 'net/http'
-require 'json'
+#require 'json'
 require 'open3'
 #require_relative 'talker'
 Bundler.require
@@ -37,7 +37,7 @@ voice = Voice.new()
 
 voice.speak("question")
 
-# 30秒録音してrailsへアップロード
+# 10秒録音してrailsへアップロード
 p "#{wavFile}へ録音中"
 voice.record(wavFile)
 rails.upload_wav(wavFile)
