@@ -6,12 +6,11 @@ class Julius
 	DEBUG_MODE = true
 	require File.dirname(__FILE__) + "/Debug"
 
-	JULIUS_PORT = 10500
 
 
 	# 初期化処理
-	def initialize()
-
+	def initialize(port)
+		@JULIUS_PORT = port
 		@debug = Debug.new(DEBUG_MODE)
 		@wordList = [
 			{
@@ -34,7 +33,7 @@ class Julius
  	 s = nil
  	 until s
  	   begin
- 	     s = TCPSocket.open(HOST, JULIUS_PORT)
+ 	     s = TCPSocket.open(HOST, @JULIUS_PORT)
  	   rescue
  	     STDERR.puts "Julius に接続失敗しました\n再接続を試みます"
  	     sleep 10
