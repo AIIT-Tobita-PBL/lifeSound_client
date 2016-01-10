@@ -21,13 +21,26 @@ class LifeLog
 		@db = PostgreSQL.new()
 		@db.connect()
 
-		@sound_patterns = [
-			"施錠音",
-			"手洗い音"
-		]
+		@types = {
+			"lifeSound" => "環境音",
+			"voice" => "発話",
+			"result" => "実績"
+		}
+
+		@sound_patterns = {
+			"handWash" => "手洗い音",
+			"ugai" => "うがい音",
+			"entrance_lock" => "施錠音"
+		}
 
 		@lock_flg = false
 		@ugai_flg = false
+
+		@msg = {
+			"message" => "",
+			"updated_at" => "2015-01-01 00:00:00",
+			"playFlag" => false
+		}
 	end
 
 	def getTime()
@@ -53,7 +66,7 @@ class LifeLog
 		# 施錠フラグが立ってない時のみ以降の処理を行う
 		return	if @lock_flg
 
-		if @sound_patterns[1] == recog_sound
+		if @sound_patterns["entrance_lock"] == recog_sound
 			@debug.print("施錠音を認識")
 			@lockTime = logTime
 
@@ -73,7 +86,7 @@ class LifeLog
 		# 施錠音フラグが立ってない場合は以降の処理は行わない
 		return if @lock_flg == false
 
-		if @sound_patterns[1] == recog_sound
+		if @sound_patterns["ugai"] == recog_sound
 			@debug.print("施錠後のうがいを認識")
 
 			if @ugai_flg == false
@@ -99,14 +112,14 @@ class LifeLog
 			# ５分以上経過した場合のみ
 			# うがいを促す
 			return if @lockTime < t - 300
-			tmp = "忘れずにうがいをしてください"
+			tmp = "帰宅してから5分経過しました。忘れずにうがいを行ってください。"
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			@ugai_flg = true
 		end
 	end
 
 
-	def lifeSound(msg, ts)
+	def lifeSound(log, ts)
 	######################
 	#
 	# 環境音をチェックする
@@ -114,38 +127,94 @@ class LifeLog
 	# うがいしていた場合は実績をrailsに残す
 	#
 	######################
-		if(msg =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}) : 環境音\((.*)\)を認識しました/)
+		if(log =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}) : (.*)\((.*)\)を認識しました/)
 			logTime = Time.local($1, $2, $3, $4, $5, 0)
-			recog_sound = $6
+			type = $6
+			recog_sound = $7
 
+			# 環境音出なかった場合は抜ける
+			return if @types["lifeSound"] != type
 
 			# 施錠音のチェック
 			checkLock(recog_sound, logTime)
 
 			# 施錠音のフラグあった場合のみ手洗いを確認する
 			checkUgai(recog_sound, ts)
+
+			return [type, recog_sound]
 		end
 	end
 
 
-	def parse(t, ts, lastTime)
+	def logParse(t, ts, lastTime)
 	######################
 	#
 	# Juliusの認識結果を処理する部分
 	#
 	######################
-		msgs = @db.sql(lastTime)
-		# メッセージが入っている配列全てをチェック
-		msgs.each do |msg|
-			#@debug.print("PostgreSQLのレコードそのまま(#{msg})")
+		# log_viewsテーブルから記録を取得
+		msgs = @db.sqlLifeLog(lastTime)
+		# 記録が入っている配列全てをチェック
+		msgs.each do |log|
+			#@debug.print("PostgreSQLのレコードそのまま(#{log})")
 			# 環境音のチェック
-			lifeSound(msg, ts)
+			type, recog_sound = lifeSound(log, ts)
 		end
+
+		# 記録が複数だった場合はイベントを書き換え
+		if msgs.length > 1
+			type = ""
+			recog_sound = "複数のイベントを認識しました"
+		end
+
+		puts("#{msgs.length}, #{type}, #{recog_sound}")
+		# 話しかけられていた場合の処理
+		talk(msgs.length, type, recog_sound)
+
+		# 認識した環境音を伝える
+		recog_lifeSound(msgs.length, type, recog_sound)
+
+		# 保存されていたメッセージの再生
+		play(msgs.length)
 
 		# 施錠音のフラグが立っていて手洗い音のフラグがない場合はうがいを促す
 		letUgai(t)
 	end
 
+	def getMsg()
+		# 保存されたメッセージの取得
+		@msg = @db.getMsg(@msg)
+	end
+
+
+	def recog_lifeSound(event_count, type, recog_sound)
+	# 認識した環境音を伝える
+		if event_count >= 1 && @types["lifeSound"] == type
+			tmp = "#{recog_sound}を認識しました。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+		end
+	end
+
+	def play(event_count)
+	# 保存されていたメッセージの再生
+		return if event_count < 1
+
+		if @msg["playFlag"]
+			tmp = "メッセージがあります。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			system("ruby record.rb")
+			@msg["playFlag"] = false
+		end
+	end
+
+
+	def talk(event_count, type, recog_sound)
+	# 発話機能
+		if event_count == 1 && @types["voice"] == type
+			tmp = "今の#{type}の内容は、#{recog_sound}ですね。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+		end
+	end
 
 	def run()
 	######################
@@ -153,11 +222,15 @@ class LifeLog
 	# main loop
 	#
 	######################
-		lastTime = Time.now() - 300
+		#lastTime = Time.now() - 300
+		lastTime = Time.now() - 300000
 		while true
+			# 保存されたメッセージを取得
+			getMsg()
+
 			# 現在時刻を取得して、前回の解析時刻以降のdbの記録を解析
 			t, ts = getTime()
-			parse(t, ts, lastTime)
+			logParse(t, ts, lastTime)
 
 			# 前回解析した時刻として保存
 			lastTime = t

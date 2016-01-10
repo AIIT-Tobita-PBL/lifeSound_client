@@ -28,10 +28,6 @@ s = julius.connectToJulius()
 
 while true
 	# juliusから認識結果を受け取ったらrailsへアップロード
-	ts, listening, answer = julius.receiveData(s)
+	ts, listening = julius.receiveData(s)
 	rails.send_json("#{ts} : 発話(#{listening})を認識しました")
-	
-	tmp = "今の発言は、#{listening}、ですね。"
-	tmp += answer
-	system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 end

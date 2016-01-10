@@ -1,36 +1,28 @@
 #! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-DEBUG_MODE = false
 
 class Julius
+	DEBUG_MODE = true
 	require File.dirname(__FILE__) + "/Debug"
 
 	JULIUS_PORT = 10500
 
-	ALL_WORD_LIST = {
-		"handWash" =>  [{
+	ALL_WORD_LIST = [
+		{
 			sound: "handWash",
-			dispWord:  "手洗い音",
-			askQuestion: false
-		}],
-		"mouthWash" => [{
+			dispWord:  "手洗い音"
+		},{
 			sound: "ugai",
-			dispWord:  "うがい音",
-			askQuestion: false
-		}],
-		"entrance_lock" => [{
+			dispWord:  "うがい音"
+		},{
 			sound: "entrance_lock",
-			dispWord:  "施錠音",
-			askQuestion: false
-		}]
-	}
+			dispWord:  "施錠音"
+		}
+	]
 
 	# 初期化処理
-	def initialize(role)
-		#検知する単語のリストを定義
-		#役割（ROLE）ごとに異なる
-		@wordList = ALL_WORD_LIST[role]
+	def initialize()
 
 		@debug = Debug.new(DEBUG_MODE)
 
@@ -66,26 +58,20 @@ class Julius
 					xml = Nokogiri(source)
 					buff = (xml/"RECOGOUT"/"SHYPO"/"WHYPO").inject("") {|ws, w| ws + w["WORD"] }
 					unless buff == ""
-					@debug.print(buff)
+						@debug.print(buff)
 						@wordList.each do |word|
 							soundName = word[:sound]
 							dispName = word[:dispWord]
-							askQuestion = word[:askQuestion]
 							if buff =~ /#{soundName}/
 								t = Time.now
 								ts = t.strftime("%Y-%m-%d %H:%M")
 								puts "recognized #{soundName}"
-								next if prev_t.has_key?(soundName)
-								prev_t[soundName] = ts
-								#send_json "#{ts} : #{dispName}を認識しました"
-								if askQuestion
-									p "break the loop"
-									return ts,dispName
-								end
+
+								p "break the loop"
+								return ts,dispName
 							end
 						end
 					end
-					prev_t = {}
 					source = ""
 				end
 			end
