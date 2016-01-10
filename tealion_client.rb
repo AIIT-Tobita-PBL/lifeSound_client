@@ -19,7 +19,7 @@ require File.dirname(__FILE__) + "/Rails"
 
 
 rails = Rails.new()
-julius = Julius.new()
+julius = Julius.new(10500)
 
 
 #Julius接続
