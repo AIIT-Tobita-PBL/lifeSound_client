@@ -24,7 +24,7 @@ class PostgreSQL
 	def sqlLifeLog(t)
 	# log_viewsテーブルから記録の取得
 		#t = Time.now - 360
-		ts = t.strftime("%Y-%m-%d %H:%M")
+		ts = t.strftime("%Y-%m-%d %H:%M:%S")
 		msgs = []
 
 		begin
