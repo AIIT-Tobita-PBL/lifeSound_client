@@ -9,9 +9,7 @@ require 'open3'
 #require_relative 'talker'
 Bundler.require
 
-#HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1"
-#APP_ROOT="#{ENV['HOME']}/tealion"
 APP_ROOT="#{ENV['TEALION_ROOT']}/tealion"
 
 # 分割した必要なクラスファイルをインポート
