@@ -194,7 +194,7 @@ class LifeLog
 		recog_lifeSound(msgs.length, type, recog_sound)
 
 		# 保存されていたメッセージの再生
-		#play(msgs.length)
+		play(msgs.length)
 
 		# 施錠音のフラグが立っていて手洗い音のフラグがない場合はうがいを促す
 		letUgai(t)
