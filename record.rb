@@ -35,7 +35,7 @@ require File.dirname(__FILE__) + "/Voice"
 rails = Rails.new()
 voice = Voice.new()
 
-voice.speak("question")
+#voice.speak("question")
 
 # 10秒録音してrailsへアップロード
 p "#{wavFile}へ録音中"

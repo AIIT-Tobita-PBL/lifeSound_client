@@ -3,29 +3,31 @@
 
 
 class Julius
-	DEBUG_MODE = true
+	require "csv"
 	require File.dirname(__FILE__) + "/Debug"
+
+	DEBUG_MODE = true
 
 
 
 	# 初期化処理
-	def initialize(port)
+	def initialize(port,csvFile)
 		@JULIUS_PORT = port
 		@debug = Debug.new(DEBUG_MODE)
-		@wordList = [
-			{
-				sound: "handWash",
-				dispWord:  "手洗い音"
-			},{
-				sound: "ugai",
-				dispWord:  "うがい音"
-			},{
-				sound: "entrance_lock",
-				dispWord:  "施錠音"
-			}
-		]
-
+		@wordList = getCSV(csvFile)
 	end
+
+
+	def getCSV(csvFile)
+	# csvファイルの取得
+		wordList =[]
+		header, *body = CSV.read(csvFile)
+			body.each do |row|
+ 	  	 wordList.push(header[0]=>row[0], header[1]=>row[1])
+		end
+		return wordList
+	end
+
 
 	# juliusへ接続
 	def connectToJulius
@@ -59,11 +61,11 @@ class Julius
 					unless buff == ""
 						@debug.print(buff)
 						@wordList.each do |word|
-							soundName = word[:sound]
-							dispName = word[:dispWord]
+							soundName = word["sound"]
+							dispName = word["dispWord"]
 							if buff =~ /#{soundName}/
 								t = Time.now
-								ts = t.strftime("%Y-%m-%d %H:%M")
+								ts = t.strftime("%Y-%m-%d %H:%M:%S")
 								puts "recognized #{soundName}"
 
 								p "break the loop"

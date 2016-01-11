@@ -9,19 +9,17 @@ require 'open3'
 #require_relative 'talker'
 Bundler.require
 
-#HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1"
 
-#APP_ROOT="#{ENV['HOME']}/tealion"
 APP_ROOT="#{ENV['TEALION_ROOT']}"
 
 # 分割した必要なクラスファイルをインポート
-require File.dirname(__FILE__) + "/Julius-voice"
+require File.dirname(__FILE__) + "/Julius"
 require File.dirname(__FILE__) + "/Rails"
 
 
 rails = Rails.new()
-julius = Julius.new()
+julius = Julius.new(10501,"voice.csv")
 
 #Julius接続
 s = julius.connectToJulius()

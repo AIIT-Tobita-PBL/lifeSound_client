@@ -9,6 +9,7 @@ APP_ROOT="#{ENV['TEALION_ROOT']}"
 
 
 class LifeLog
+	require "csv"
 	require File.dirname(__FILE__) + "/PostgreSQL"
 	require File.dirname(__FILE__) + "/Rails"
 	require File.dirname(__FILE__) + "/Debug"
@@ -27,9 +28,11 @@ class LifeLog
 			"result" => "実績"
 		}
 
+		@voiceList=getCSV("voice.csv")
+
 		@sound_patterns = {
 			"handWash" => "手洗い音",
-			"ugai" => "うがい音",
+			"mouthWash" => "うがい音",
 			"entrance_lock" => "施錠音"
 		}
 
@@ -50,12 +53,22 @@ class LifeLog
 	#
 	######################
 		t = Time.now()
-		ts = t.strftime("%Y-%m-%d %H:%M")
+		ts = t.strftime("%Y-%m-%d %H:%M:%S")
 		return [t,ts]
 	end
 
 
-	def checkLock(recog_sound, logTime)
+  def getCSV(csvFile)
+  # csvファイルの取得
+    wordList =[]
+    header, *body = CSV.read(csvFile)
+      body.each do |row|
+       wordList.push(header[1]=>row[1], header[2]=>row[2])
+    end
+    return wordList
+  end
+
+	def checkLock(type, recog_sound, logTime)
 	######################
 	#
 	# 施錠音がしたかチェック
@@ -63,6 +76,8 @@ class LifeLog
 	# 当然帰宅したか外出したか間違えたら間違え続ける
 	#
 	######################
+		# 環境音出なかった場合は抜ける
+		return if @types["lifeSound"] != type
 		# 施錠フラグが立ってない時のみ以降の処理を行う
 		return	if @lock_flg
 
@@ -77,16 +92,18 @@ class LifeLog
 	end
 
 
-	def checkUgai(recog_sound, ts)
+	def checkUgai(type, recog_sound, ts)
 	######################
 	#
 	# うがいをしたかチェック
 	#
 	######################
+		# 環境音出なかった場合は抜ける
+		return if @types["lifeSound"] != type
 		# 施錠音フラグが立ってない場合は以降の処理は行わない
 		return if @lock_flg == false
 
-		if @sound_patterns["ugai"] == recog_sound
+		if @sound_patterns["mouthWash"] == recog_sound
 			@debug.print("施錠後のうがいを認識")
 
 			if @ugai_flg == false
@@ -128,19 +145,19 @@ class LifeLog
 	# うがいしていた場合は実績をrailsに残す
 	#
 	######################
-		if(log =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}) : (.*)\((.*)\)を認識しました/)
-			logTime = Time.local($1, $2, $3, $4, $5, 0)
-			type = $6
-			recog_sound = $7
+		if(log =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) : (.*)\((.*)\)を認識しました/)
+			logTime = Time.local($1, $2, $3, $4, $5, $6)
+			type = $7
+			recog_sound = $8
 
 			# 環境音出なかった場合は抜ける
-			return if @types["lifeSound"] != type
+			#return if @types["lifeSound"] != type
 
 			# 施錠音のチェック
-			checkLock(recog_sound, logTime)
+			checkLock(type, recog_sound, logTime)
 
 			# 施錠音のフラグあった場合のみ手洗いを確認する
-			checkUgai(recog_sound, ts)
+			checkUgai(type, recog_sound, ts)
 
 			return [type, recog_sound]
 		end
@@ -155,15 +172,17 @@ class LifeLog
 	######################
 		# log_viewsテーブルから記録を取得
 		msgs = @db.sqlLifeLog(lastTime)
+		#@debug.print("PostgreSQLのレコードそのまま(#{msgs})")
 		# 記録が入っている配列全てをチェック
+		type=""
+		recog_sound = ""
 		msgs.each do |log|
-			#@debug.print("PostgreSQLのレコードそのまま(#{log})")
 			# 環境音のチェック
 			type, recog_sound = lifeSound(log, ts)
 		end
 
 		# 記録が複数だった場合はイベントを書き換え
-		if msgs.length > 1
+		if msgs.length >= 2
 			type = @types["lifeSound"]
 			recog_sound = "#{msgs.length}件のイベント"
 		end
@@ -175,7 +194,7 @@ class LifeLog
 		recog_lifeSound(msgs.length, type, recog_sound)
 
 		# 保存されていたメッセージの再生
-		play(msgs.length)
+		#play(msgs.length)
 
 		# 施錠音のフラグが立っていて手洗い音のフラグがない場合はうがいを促す
 		letUgai(t)
@@ -197,6 +216,7 @@ class LifeLog
 		end
 	end
 
+
 	def play(event_count)
 	# 保存されていたメッセージの再生
 		return if event_count < 1
@@ -205,6 +225,8 @@ class LifeLog
 			tmp = "メッセージがあります。"
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
+			system("#{APP_ROOT}/bin/talk.sh #{@msg["message"]}")
 			sleep(5)
 			system("ruby record.rb")
 			@msg["playFlag"] = false
@@ -217,6 +239,13 @@ class LifeLog
 	# 発話機能
 		if event_count == 1 && @types["voice"] == type
 			tmp = "今の発言は、#{recog_sound}、ですね。"
+			@voiceList.each do |word|
+				dispWord = word["dispWord"]
+				answer = word["answer"]
+				if recog_sound =~ /#{dispWord}/
+					tmp += "#{answer}"
+				end
+			end
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			sleep(5)
@@ -229,8 +258,7 @@ class LifeLog
 	# main loop
 	#
 	######################
-		#lastTime = Time.now() - 300
-		lastTime = Time.now() - 300000
+		lastTime = Time.now() - 300
 		while true
 			# 保存されたメッセージを取得
 			getMsg()

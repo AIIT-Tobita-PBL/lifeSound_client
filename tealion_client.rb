@@ -11,17 +11,17 @@ Bundler.require
 
 #HOST = "192.168.100.107:3000"
 HOST = "127.0.0.1"
-APP_ROOT="#{ENV['HOME']}/tealion"
+#APP_ROOT="#{ENV['HOME']}/tealion"
+APP_ROOT="#{ENV['TEALION_ROOT']}/tealion"
 
 # 分割した必要なクラスファイルをインポート
 require File.dirname(__FILE__) + "/Julius"
 require File.dirname(__FILE__) + "/Rails"
 
-
 rails = Rails.new()
-julius = Julius.new(10500)
 
 
+julius = Julius.new(10500, "lifeSound.csv")
 #Julius接続
 s = julius.connectToJulius()
 
