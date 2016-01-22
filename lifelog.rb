@@ -33,11 +33,13 @@ class LifeLog
 		@sound_patterns = {
 			"handWash" => "手洗い音",
 			"mouthWash" => "うがい音",
+			"ugai" => "うがい音",
 			"entrance_lock" => "施錠音"
 		}
 
 		@lock_flg = false
 		@ugai_flg = false
+		@handSoap_flg = false
 
 		@msg = {
 			"message" => "",
@@ -88,6 +90,7 @@ class LifeLog
 			# フラグ処理
 			@lock_flg = !@lock_flg
 			@ugai_flg = false
+			@handSoap_flg = false
 		end
 	end
 
@@ -98,7 +101,7 @@ class LifeLog
 	# うがいをしたかチェック
 	#
 	######################
-		# 環境音出なかった場合は抜ける
+		# 環境音でなかった場合は抜ける
 		return if @types["lifeSound"] != type
 		# 施錠音フラグが立ってない場合は以降の処理は行わない
 		return if @lock_flg == false
@@ -109,6 +112,28 @@ class LifeLog
 			if @ugai_flg == false
 				@rails.send_json("#{ts} : 実績(うがい)")
 				@ugai_flg = true
+			end
+		end
+	end
+
+
+	def checkHandSoap(type, recog_sound, ts)
+	######################
+	#
+	# 手洗い石鹸を使ったかチェック
+	#
+	######################
+		# 実績でなかった場合は抜ける
+		return if @types["result"] != type
+		# 施錠音フラグが立ってない場合は以降の処理は行わない
+		return if @lock_flg == false
+
+		if "handSoap" == recog_sound
+			@debug.print("施錠後の手洗い石鹸の使用を認識")
+
+			if @handSoap_flg == false
+				@rails.send_json("#{ts} : 実績(施錠後の手洗い石鹸の使用)")
+				@handSoap_flg = true
 			end
 		end
 	end
@@ -158,6 +183,9 @@ class LifeLog
 
 			# 施錠音のフラグあった場合のみ手洗いを確認する
 			checkUgai(type, recog_sound, ts)
+
+			# 施錠音のフラグあった場合のみ手洗い石鹸を確認する
+			checkHandSoap(type, recog_sound, ts)
 
 			return [type, recog_sound]
 		end
