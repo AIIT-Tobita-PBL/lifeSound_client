@@ -128,7 +128,7 @@ class LifeLog
 		# 施錠音フラグが立ってない場合は以降の処理は行わない
 		return if @lock_flg == false
 
-		if "handSoap" == recog_sound
+		if "石鹸を使いました。" == recog_sound
 			@debug.print("施錠後の手洗い石鹸の使用を認識")
 
 			if @handSoap_flg == false
@@ -175,7 +175,7 @@ class LifeLog
 			type = $7
 			recog_sound = $8
 
-			# 環境音出なかった場合は抜ける
+			# 環境音でなかった場合は抜ける
 			#return if @types["lifeSound"] != type
 
 			# 施錠音のチェック
@@ -184,10 +184,18 @@ class LifeLog
 			# 施錠音のフラグあった場合のみ手洗いを確認する
 			checkUgai(type, recog_sound, ts)
 
+			return [type, recog_sound]
+		end
+
+		# 石鹸対応
+		if(log =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) : 石鹸を使いました。/)
+			logTime = Time.local($1, $2, $3, $4, $5, $6)
+			type = "実績"
+			recog_sound = "石鹸を使いました。"
+
 			# 施錠音のフラグあった場合のみ手洗い石鹸を確認する
 			checkHandSoap(type, recog_sound, ts)
 
-			return [type, recog_sound]
 		end
 	end
 
@@ -238,6 +246,9 @@ class LifeLog
 	# 認識した環境音を伝える
 		if event_count >= 1 && @types["lifeSound"] == type
 			tmp = "#{recog_sound}を認識しました。"
+			if event_count == 1
+				tmp = tmp + "いいね！"
+			end
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			sleep(5)
@@ -250,13 +261,19 @@ class LifeLog
 		return if event_count < 1
 
 		if @msg["playFlag"]
-			tmp = "メッセージがあります。"
+			tmp = "メッセージがあります。メッセージを再生します。"
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			sleep(5)
 			system("#{APP_ROOT}/bin/talk.sh #{@msg["message"]}")
 			sleep(5)
+			tmp = "メッセージは以上です。メッセージへの返答を記録します。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
 			system("ruby record.rb")
+			sleep(5)
+			tmp = "返答を記録しました。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			@msg["playFlag"] = false
 			sleep(5)
 		end

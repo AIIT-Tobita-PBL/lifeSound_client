@@ -12,12 +12,22 @@ class PostgreSQL
 	end
 
 	def connect()
-		@conn = PG::connect(
-			host: "localhost",
-			user: "pi",
-			password: "pi",
-			dbname: "lifeSoundLog_development"
-		)
+		@conn = nil
+		until @conn
+			begin
+				@conn = PG::connect(
+					host: "localhost",
+					user: "pi",
+					password: "pi",
+					dbname: "lifeSoundLog_development"
+				)
+			rescue
+				STDERR.puts "PostgreSQLの接続に失敗しました。\n再接続を試みます。"
+				sleep 10
+				retry
+			end
+		end
+		puts "PostgreSQLに接続しました。"
 		#return conn
 	end
 
