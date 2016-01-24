@@ -238,6 +238,9 @@ class LifeLog
 	# 認識した環境音を伝える
 		if event_count >= 1 && @types["lifeSound"] == type
 			tmp = "#{recog_sound}を認識しました。"
+			if event_count == 1
+				tmp = tmp + "いいね！"
+			end
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			sleep(5)
@@ -250,13 +253,19 @@ class LifeLog
 		return if event_count < 1
 
 		if @msg["playFlag"]
-			tmp = "メッセージがあります。"
+			tmp = "メッセージがあります。メッセージを再生します。"
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			sleep(5)
 			system("#{APP_ROOT}/bin/talk.sh #{@msg["message"]}")
 			sleep(5)
+			tmp = "メッセージは以上です。メッセージへの返答を記録します。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
+			sleep(5)
 			system("ruby record.rb")
+			sleep(5)
+			tmp = "返答を記録しました。"
+			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			@msg["playFlag"] = false
 			sleep(5)
 		end
