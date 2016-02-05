@@ -34,7 +34,7 @@ class LifeLog
 			"handWash" => "手洗い音",
 			"mouthWash" => "うがい音",
 			"ugai" => "うがい音",
-			"entrance_lock" => "施錠音"
+			"entrance_lock" => "ロック音"
 		}
 
 		@lock_flg = false
@@ -73,18 +73,18 @@ class LifeLog
 	def checkLock(type, recog_sound, logTime)
 	######################
 	#
-	# 施錠音がしたかチェック
-	# 施錠音をもって帰宅したかどうかを判別する
+	# ロック音がしたかチェック
+	# ロック音をもって帰宅したかどうかを判別する
 	# 当然帰宅したか外出したか間違えたら間違え続ける
 	#
 	######################
 		# 環境音出なかった場合は抜ける
 		return if @types["lifeSound"] != type
-		# 施錠フラグが立ってない時のみ以降の処理を行う
+		# ロックフラグが立ってない時のみ以降の処理を行う
 		return	if @lock_flg
 
 		if @sound_patterns["entrance_lock"] == recog_sound
-			@debug.print("施錠音を認識")
+			@debug.print("ロック音を認識")
 			@lockTime = logTime
 
 			# フラグ処理
@@ -103,11 +103,11 @@ class LifeLog
 	######################
 		# 環境音でなかった場合は抜ける
 		return if @types["lifeSound"] != type
-		# 施錠音フラグが立ってない場合は以降の処理は行わない
+		# ロック音フラグが立ってない場合は以降の処理は行わない
 		return if @lock_flg == false
 
 		if @sound_patterns["mouthWash"] == recog_sound
-			@debug.print("施錠後のうがいを認識")
+			@debug.print("ロック後のうがいを認識")
 
 			if @ugai_flg == false
 				@rails.send_json("#{ts} : 実績(うがい)")
@@ -125,14 +125,14 @@ class LifeLog
 	######################
 		# 実績でなかった場合は抜ける
 		return if @types["result"] != type
-		# 施錠音フラグが立ってない場合は以降の処理は行わない
+		# ロック音フラグが立ってない場合は以降の処理は行わない
 		return if @lock_flg == false
 
 		if "石鹸を使いました。" == recog_sound
-			@debug.print("施錠後の手洗い石鹸の使用を認識")
+			@debug.print("ロック後の手洗い石鹸の使用を認識")
 
 			if @handSoap_flg == false
-				@rails.send_json("#{ts} : 実績(施錠後の手洗い石鹸の使用)")
+				@rails.send_json("#{ts} : 実績(ロック後の手洗い石鹸の使用)")
 				@handSoap_flg = true
 			end
 		end
@@ -145,12 +145,12 @@ class LifeLog
 	# うがいを促す
 	#
 	######################
-		# 施錠フラグが立っており、
+		# ロックフラグが立っており、
 		# うがいフラグが立ってない場合のみ
 		# 以降の処理をおこなう
 		if @lock_flg == true && @ugai_flg == false
 
-			# 施錠音フラグが立った時刻から
+			# ロック音フラグが立った時刻から
 			# ５分以上経過した場合のみ
 			# うがいを促す
 			return if @lockTime < t - 300
@@ -166,7 +166,7 @@ class LifeLog
 	######################
 	#
 	# 環境音をチェックする
-	# 施錠音の後、5分以内にうがいがないとうがいを促す
+	# ロック音の後、5分以内にうがいがないとうがいを促す
 	# うがいしていた場合は実績をrailsに残す
 	#
 	######################
@@ -178,10 +178,10 @@ class LifeLog
 			# 環境音でなかった場合は抜ける
 			#return if @types["lifeSound"] != type
 
-			# 施錠音のチェック
+			# ロック音のチェック
 			checkLock(type, recog_sound, logTime)
 
-			# 施錠音のフラグあった場合のみ手洗いを確認する
+			# ロック音のフラグあった場合のみ手洗いを確認する
 			checkUgai(type, recog_sound, ts)
 
 			return [type, recog_sound]
@@ -193,7 +193,7 @@ class LifeLog
 			type = "実績"
 			recog_sound = "石鹸を使いました。"
 
-			# 施錠音のフラグあった場合のみ手洗い石鹸を確認する
+			# ロック音のフラグあった場合のみ手洗い石鹸を確認する
 			checkHandSoap(type, recog_sound, ts)
 
 		end
@@ -232,7 +232,7 @@ class LifeLog
 		# 保存されていたメッセージの再生
 		play(msgs.length)
 
-		# 施錠音のフラグが立っていて手洗い音のフラグがない場合はうがいを促す
+		# ロック音のフラグが立っていて手洗い音のフラグがない場合はうがいを促す
 		letUgai(t)
 	end
 
@@ -264,7 +264,7 @@ class LifeLog
 			tmp = "メッセージがあります。メッセージを再生します。"
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
-			sleep(5)
+			sleep(7)
 			system("#{APP_ROOT}/bin/talk.sh #{@msg["message"]}")
 			sleep(5)
 			tmp = "メッセージは以上です。メッセージへの返答を記録します。"

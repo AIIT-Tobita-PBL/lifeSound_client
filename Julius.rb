@@ -6,7 +6,7 @@ class Julius
 	require "csv"
 	require File.dirname(__FILE__) + "/Debug"
 
-	DEBUG_MODE = true
+	DEBUG_MODE = false
 
 
 
@@ -78,6 +78,45 @@ class Julius
 			end
 		end
 	end
+
+
+	# 玄関ドアのロック音用
+	# Juliusからの認識結果
+	def receiveEntranceData(s)
+		source = ""
+		prev_t = {}
+		while true
+			ret = IO::select([s])
+			ret[0].each do |sock|
+				source += sock.recv(65535)
+				if source[-2..source.size] == ".\n"
+					source.gsub!(/\.\n/, "")
+					if source =~ /<GMM RESULT=\"(.*)\" CMSCORE=\"(.*)\"\/>/
+						@debug.print(source)
+						# 認識結果
+						recognition = $1
+						# 認識結果のCM値
+						score = $2
+
+						@wordList.each do |word|
+							soundName = word["sound"]
+							dispName = word["dispWord"]
+							if recognition =~ /#{soundName}/
+								t = Time.now
+								ts = t.strftime("%Y-%m-%d %H:%M:%S")
+								puts "recognized #{soundName}"
+
+								p "break the loop"
+								return ts,dispName
+							end
+						end
+					end
+					source = ""
+				end
+			end
+		end
+	end
+
 
 	# juliusのサービスコントロール用(今は使用していない)
 	def juliusControl(cmd)
