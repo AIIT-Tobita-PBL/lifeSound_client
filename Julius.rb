@@ -96,7 +96,9 @@ class Julius
 						# 認識結果
 						recognition = $1
 						# 認識結果のCM値
-						score = $2
+						score = $2.to_i
+
+						if score < 0 then next end
 
 						@wordList.each do |word|
 							soundName = word["sound"]

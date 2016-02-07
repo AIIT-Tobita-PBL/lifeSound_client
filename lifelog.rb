@@ -156,7 +156,7 @@ class LifeLog
 			return if @lockTime < t - 300
 			tmp = "帰宅してから5分経過しました。忘れずにうがいを行ってください。"
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
-			sleep(5)
+			sleep(7)
 			@ugai_flg = true
 		end
 	end
@@ -251,7 +251,7 @@ class LifeLog
 			end
 			@debug.print(tmp)
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
-			sleep(5)
+			sleep(6)
 		end
 	end
 
@@ -266,16 +266,16 @@ class LifeLog
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			sleep(7)
 			system("#{APP_ROOT}/bin/talk.sh #{@msg["message"]}")
-			sleep(5)
+			sleep(6)
 			tmp = "メッセージは以上です。メッセージへの返答を記録します。"
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
-			sleep(5)
+			sleep(7)
 			system("ruby record.rb")
-			sleep(5)
+			sleep(6)
 			tmp = "返答を記録しました。"
 			system("#{APP_ROOT}/bin/talk.sh #{tmp}")
 			@msg["playFlag"] = false
-			sleep(5)
+			sleep(6)
 		end
 	end
 
